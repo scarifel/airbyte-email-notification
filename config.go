@@ -1,0 +1,28 @@
+package airbytenotificationwebhooksmtp
+
+import "github.com/kelseyhightower/envconfig"
+
+type SMTPConfig struct {
+	Host            string   `envconfig:"SMTP_HOST" required:"true"`
+	Port            int      `envconfig:"SMTP_PORT" required:"true"`
+	AnonymousAccess bool     `envconfig:"SMTP_ANONYMOUS_ACCESS" required:"true"`
+	Username        string   `envconfig:"SMTP_USERNAME"`
+	Password        string   `envconfig:"SMTP_PASSWORD"`
+	From            string   `envconfig:"SMTP_FROM" required:"true"`
+	To              []string `envconfig:"SMTP_TO" required:"true"`
+	Subject         string   `envconfig:"SMTP_SUBJECT" default:"Airbyte Notification"`
+}
+
+type Config struct {
+	SMTP SMTPConfig
+}
+
+func LoadConfig() (*Config, error) {
+	var config Config
+
+	if err := envconfig.Process("", &config); err != nil {
+		return nil, err
+	}
+
+	return &config, nil
+}
