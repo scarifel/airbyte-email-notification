@@ -52,25 +52,31 @@ func main() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, syscall.SIGTERM, syscall.SIGTERM)
 
-	// Отправка сообщений по SMTP
+	// отправка сообщений по SMTP
 	go func() {
 		for message := range server.Messages() {
 			if err := smtp.SendMessage(message); err != nil {
 				logger.Fatal(fmt.Sprintf("Email sent failed: %s", err.Error()))
 			}
 
-			logger.Info(fmt.Sprintf("Email sent success." +
-			    "Event: %s, Stream: %s," +
-				"Sync start time: %s, Sync end time: %s, record_processed: %d",
+			logger.Info(fmt.Sprintf("Email sent success:\r\n"+
+				"\tEvent: %s\r\n"+
+				"\tStream: %s\r\n"+
+				"\tSync start time: %s\r\n"+
+				"\tSync end time: %s\r\n"+
+				"\tRecord processed: %d\r\n"+
+				"\tError message: %s",
 				message.Event,
 				message.Stream,
 				message.SyncStartTime.Format("2006-01-02 15:04:05"),
 				message.SyncEndTime.Format("2006-01-02 15:04:05"),
-				message.RecordsProcessed))
+				message.RecordsProcessed,
+				message.ErrorMessage),
+			)
 		}
 	}()
 
-	// Запуск HTTP сервера
+	// запуск HTTP сервера
 	go func() {
 		logger.Info(fmt.Sprintf("Starting server on %s", server.HttpServer.Addr))
 

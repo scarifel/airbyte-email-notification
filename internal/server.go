@@ -2,7 +2,10 @@ package internal
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+
+	"github.com/scarifel/airbyte-email-notification/logger"
 	"github.com/scarifel/airbyte-email-notification/model"
 )
 
@@ -38,6 +41,7 @@ func (s *Server) handlerMessages(w http.ResponseWriter, r *http.Request) {
 	var payload model.Message
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
+		logger.Error(fmt.Sprintf("Failed to decode request body\r\n" + "Body: %s", r.Body))
 		return
 	}
 
