@@ -15,6 +15,7 @@ type SMTPConfig struct {
 }
 
 type Config struct {
+	Port string `envconfig:"PORT" default:"8080"`
 	SMTP SMTPConfig
 }
 

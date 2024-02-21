@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,7 +25,8 @@ func main() {
 	}
 
 	// инициализация server
-	server := internal.NewHTTPServer(":8080")
+	port := fmt.Sprintf(":%s", config.Port)
+	server := internal.NewHTTPServer(port)
 	defer server.Close()
 
 	// инициализация smtp
@@ -70,7 +73,8 @@ func main() {
 	// Запуск HTTP сервера
 	go func() {
 		logger.Info(fmt.Sprintf("Starting server on %s", server.HttpServer.Addr))
-		if err := server.HttpServer.ListenAndServe(); err != nil {
+
+		if err := server.HttpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Fatal(fmt.Sprintf("Error starting http server: %s", err.Error()))
 		}
 	}()
