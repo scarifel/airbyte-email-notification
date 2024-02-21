@@ -1,4 +1,4 @@
-package airbytenotificationwebhooksmtp
+package airbyteemailnotification
 
 import "github.com/kelseyhightower/envconfig"
 
@@ -11,7 +11,7 @@ type SMTPConfig struct {
 	Password        string   `envconfig:"SMTP_PASSWORD"`
 	From            string   `envconfig:"SMTP_FROM" required:"true"`
 	To              []string `envconfig:"SMTP_TO" required:"true"`
-	Subject         string   `envconfig:"SMTP_SUBJECT" default:"Airbyte Notification"`
+	Subject         string   `envconfig:"SMTP_SUBJECT" default:"AIRBYTE NOTIFICATION"`
 }
 
 type Config struct {

@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	notifier "github.com/scarifel/airbyte-notification-webhook-smtp"
+	notifier "github.com/scarifel/airbyte-email-notification"
 )
 
 func main() {
@@ -31,6 +31,7 @@ func main() {
 		Password:        config.SMTP.Password,
 		From:            config.SMTP.From,
 		To:              config.SMTP.To,
+		Subject:         config.SMTP.Subject,
 	})
 
 	if err := smtp.Connection(); err != nil {

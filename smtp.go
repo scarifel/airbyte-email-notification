@@ -1,12 +1,14 @@
-package airbytenotificationwebhooksmtp
+package airbyteemailnotification
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/smtp"
 	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type SMTPServer struct {
@@ -114,13 +116,32 @@ func (s *SMTP) SendMessage(message Message) error {
 	}
 	defer w.Close()
 
-	messageBytes, err := json.Marshal(message)
-	if err != nil {
-		return fmt.Errorf("failed to encoding message to bytes: %w", err)
-	}
+	buildedMessage := s.buildMail(message)
 
-	if _, err = w.Write(messageBytes); err != nil {
+	if _, err = w.Write(buildedMessage); err != nil {
 		return fmt.Errorf("failed to write message data: %w", err)
 	}
 	return nil
+}
+
+
+func (s *SMTP) buildMail(m Message) []byte {
+	caser := cases.Title(language.English)
+
+	subject := fmt.Sprintf("Subject: [%s] %s syncronization\r\n", 
+	s.config.Subject, caser.String(m.Event))
+
+	body := fmt.Sprintf("Event: %s\r\n" +
+		"Stream: %s\r\n" + 
+		"Sync Start: %s\r\n" + 
+		"Sync End: %s\r\n" + 
+		"Records Processed: %d\r\n",
+		m.Event, m.Stream, m.SyncStartTime, m.SyncEndTime, m.RecordsProcessed,
+	)
+
+	if m.ErrorMessage != "" {
+		body+= fmt.Sprintf("Error Message: %s\r\n", m.ErrorMessage)
+	}
+
+	return []byte(subject + "\r\n" + body)
 }

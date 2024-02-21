@@ -1,4 +1,4 @@
-package airbytenotificationwebhooksmtp
+package airbyteemailnotification
 
 import (
 	"encoding/json"
