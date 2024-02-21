@@ -6,30 +6,35 @@ import (
 	"fmt"
 	"net/smtp"
 	"strings"
+
 	"github.com/scarifel/airbyte-email-notification/model"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
-type SMTPServer struct {
+type MailConfig struct {
+	From    string
+	To      []string
+	Subject string
+}
+
+type SMTPConfig struct {
 	Host            string
 	Port            int
 	AnonymousAccess bool
 	TLS             bool
 	Username        string
 	Password        string
-	From            string
-	To              []string
-	Subject         string
+	MailConfig      MailConfig
 }
 
 type SMTP struct {
-	config SMTPServer
+	config SMTPConfig
 	conn   *smtp.Client
 }
 
-func NewSMTP(config SMTPServer) *SMTP {
+func NewSMTP(config SMTPConfig) *SMTP {
 	return &SMTP{
 		config: config,
 	}
@@ -84,11 +89,11 @@ func (s *SMTP) connect() error {
 
 // checkEmailAddresses выполняет проверку контактных данных отправителя и получателя(ей) сообщения
 func (s *SMTP) checkEmailAddresses() error {
-	if s.config.From == "" {
+	if s.config.MailConfig.From == "" {
 		return errors.New("sender email cannot be empty")
 	}
 
-	if len(s.config.To) == 0 {
+	if len(s.config.MailConfig.To) == 0 {
 		return errors.New("recipient email address cannot be empty")
 	}
 
@@ -103,12 +108,12 @@ func (s *SMTP) Close() error {
 // SendMessage выполняет отправку сообщения
 func (s *SMTP) SendMessage(message model.Message) error {
 	// отправитель
-	if err := s.conn.Mail(s.config.From); err != nil {
+	if err := s.conn.Mail(s.config.MailConfig.From); err != nil {
 		return fmt.Errorf("failed to set sender: %w", err)
 	}
 
 	// получатель
-	if err := s.conn.Rcpt(strings.Join(s.config.To, ",")); err != nil {
+	if err := s.conn.Rcpt(strings.Join(s.config.MailConfig.To, ",")); err != nil {
 		return fmt.Errorf("failed to add recipients: %w", err)
 	}
 	w, err := s.conn.Data()
@@ -125,23 +130,22 @@ func (s *SMTP) SendMessage(message model.Message) error {
 	return nil
 }
 
-
 func (s *SMTP) buildMail(m model.Message) []byte {
 	caser := cases.Title(language.English)
 
-	subject := fmt.Sprintf("Subject: [%s] %s syncronization\r\n", 
-	s.config.Subject, caser.String(m.Event))
+	subject := fmt.Sprintf("Subject: [%s] %s syncronization\r\n",
+		s.config.MailConfig.Subject, caser.String(m.Event))
 
-	body := fmt.Sprintf("Event: %s\r\n" +
-		"Stream: %s\r\n" + 
-		"Sync Start: %s\r\n" + 
-		"Sync End: %s\r\n" + 
+	body := fmt.Sprintf("Event: %s\r\n"+
+		"Stream: %s\r\n"+
+		"Sync Start: %s\r\n"+
+		"Sync End: %s\r\n"+
 		"Records Processed: %d\r\n",
 		m.Event, m.Stream, m.SyncStartTime, m.SyncEndTime, m.RecordsProcessed,
 	)
 
 	if m.ErrorMessage != "" {
-		body+= fmt.Sprintf("Error Message: %s\r\n", m.ErrorMessage)
+		body += fmt.Sprintf("Error Message: %s\r\n", m.ErrorMessage)
 	}
 
 	return []byte(subject + "\r\n" + body)
