@@ -26,6 +26,7 @@ func main() {
 		Host:            config.SMTP.Host,
 		Port:            config.SMTP.Port,
 		AnonymousAccess: config.SMTP.AnonymousAccess,
+		TLS:             config.SMTP.TLS,
 		Username:        config.SMTP.Username,
 		Password:        config.SMTP.Password,
 		From:            config.SMTP.From,

@@ -13,6 +13,7 @@ type SMTPServer struct {
 	Host            string
 	Port            int
 	AnonymousAccess bool
+	TLS             bool
 	Username        string
 	Password        string
 	From            string
@@ -65,8 +66,13 @@ func (s *SMTP) connect() error {
 		return fmt.Errorf("failed to connect to the SMTP server: %w", err)
 	}
 
-	if err := conn.StartTLS(&tls.Config{InsecureSkipVerify: true}); err != nil {
-		return fmt.Errorf("failed to start TLS connection: %w", err)
+	if s.config.TLS {
+		if err := conn.StartTLS(&tls.Config{
+			InsecureSkipVerify: true,
+			ServerName:         addr,
+		}); err != nil {
+			return fmt.Errorf("failed to start TLS connection: %w", err)
+		}
 	}
 
 	s.conn = conn
