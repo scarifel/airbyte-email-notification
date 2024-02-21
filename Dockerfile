@@ -1,4 +1,4 @@
-FROM golang:1.25.1-apphine as base
+FROM golang:1.21.5-alpine as base
 
 FROM base as builder
 WORKDIR /app
