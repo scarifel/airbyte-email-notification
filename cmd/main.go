@@ -7,22 +7,23 @@ import (
 	"os/signal"
 	"syscall"
 
-	notifier "github.com/scarifel/airbyte-email-notification"
+	"github.com/scarifel/airbyte-email-notification/config"
+	"github.com/scarifel/airbyte-email-notification/internal"
 )
 
 func main() {
 	// load config
-	config, err := notifier.LoadConfig()
+	config, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Error loading configuration: %s", err.Error())
 	}
 
 	// инициализация server
-	server := notifier.NewHTTPServer(":8080")
+	server := internal.NewHTTPServer(":8080")
 	defer server.Close()
 
 	// инициализация smtp
-	smtp := notifier.NewSMTP(notifier.SMTPServer{
+	smtp := internal.NewSMTP(internal.SMTPServer{
 		Host:            config.SMTP.Host,
 		Port:            config.SMTP.Port,
 		AnonymousAccess: config.SMTP.AnonymousAccess,

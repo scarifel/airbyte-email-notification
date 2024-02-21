@@ -1,4 +1,4 @@
-package airbyteemailnotification
+package internal
 
 import (
 	"crypto/tls"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/smtp"
 	"strings"
+	"github.com/scarifel/airbyte-email-notification/model"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -100,7 +101,7 @@ func (s *SMTP) Close() error {
 }
 
 // SendMessage выполняет отправку сообщения
-func (s *SMTP) SendMessage(message Message) error {
+func (s *SMTP) SendMessage(message model.Message) error {
 	// отправитель
 	if err := s.conn.Mail(s.config.From); err != nil {
 		return fmt.Errorf("failed to set sender: %w", err)
@@ -125,7 +126,7 @@ func (s *SMTP) SendMessage(message Message) error {
 }
 
 
-func (s *SMTP) buildMail(m Message) []byte {
+func (s *SMTP) buildMail(m model.Message) []byte {
 	caser := cases.Title(language.English)
 
 	subject := fmt.Sprintf("Subject: [%s] %s syncronization\r\n", 

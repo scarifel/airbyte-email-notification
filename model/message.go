@@ -1,4 +1,4 @@
-package airbyteemailnotification
+package model
 
 import "time"
 

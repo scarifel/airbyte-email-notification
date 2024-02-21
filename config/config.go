@@ -1,4 +1,4 @@
-package airbyteemailnotification
+package config
 
 import "github.com/kelseyhightower/envconfig"
 

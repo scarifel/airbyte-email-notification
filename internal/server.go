@@ -1,12 +1,13 @@
-package airbyteemailnotification
+package internal
 
 import (
 	"encoding/json"
 	"net/http"
+	"github.com/scarifel/airbyte-email-notification/model"
 )
 
 type Server struct {
-	messages   chan Message
+	messages   chan model.Message
 	mux        *http.ServeMux
 	HttpServer *http.Server
 }
@@ -15,7 +16,7 @@ func NewHTTPServer(addr string) *Server {
 	mux := http.NewServeMux()
 
 	s :=  &Server{
-		messages: make(chan Message),
+		messages: make(chan model.Message),
 		mux:      mux,
 		HttpServer: &http.Server{
 			Addr:    addr,
@@ -34,7 +35,7 @@ func (s *Server) handlerMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload Message
+	var payload model.Message
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
 		return
@@ -45,7 +46,7 @@ func (s *Server) handlerMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 // Messages возвращает канал для чтения сообщений
-func (s *Server) Messages() <-chan Message {
+func (s *Server) Messages() <-chan model.Message {
 	return s.messages
 }
 
