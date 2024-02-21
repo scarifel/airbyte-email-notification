@@ -18,7 +18,7 @@ type Server struct {
 func NewHTTPServer(addr string) *Server {
 	mux := http.NewServeMux()
 
-	s :=  &Server{
+	s := &Server{
 		messages: make(chan model.Message),
 		mux:      mux,
 		HttpServer: &http.Server{
@@ -41,7 +41,13 @@ func (s *Server) handlerMessages(w http.ResponseWriter, r *http.Request) {
 	var payload model.Message
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
-		logger.Error(fmt.Sprintf("Failed to decode request body\r\n" + "Body: %s", r.Body))
+		logger.Error(fmt.Sprintf("Failed to decode request body\r\n"+"\tBody: %s", r.Body))
+		return
+	}
+
+	if err := payload.Validate(); err != nil {
+		http.Error(w, "Failed to validate request body", http.StatusBadRequest)
+		logger.Error("Failed to validate request body")
 		return
 	}
 

@@ -131,10 +131,11 @@ func (s *SMTP) SendMessage(message model.Message) error {
 }
 
 func (s *SMTP) buildMail(m model.Message) []byte {
-	caser := cases.Title(language.English)
+	caserTitle := cases.Title(language.English)
+	caserUpper := cases.Upper(language.English)
 
-	subject := fmt.Sprintf("Subject: [%s] %s syncronization\r\n",
-		s.config.MailConfig.Subject, caser.String(m.Event))
+	subject := fmt.Sprintf("Subject: [%s] %s %s syncronization\r\n",
+		s.config.MailConfig.Subject, caserTitle.String(m.Stream), caserUpper.String(m.Event))
 
 	body := fmt.Sprintf("Event: %s\r\n"+
 		"Stream: %s\r\n"+
