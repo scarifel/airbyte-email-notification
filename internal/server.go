@@ -1,8 +1,10 @@
 package internal
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/scarifel/airbyte-email-notification/logger"
@@ -27,7 +29,7 @@ func NewHTTPServer(addr string) *Server {
 		},
 	}
 
-	s.mux.HandleFunc("/send_report", s.handlerMessages)
+	s.mux.HandleFunc("/webhook", s.handlerMessages)
 
 	return s
 }
@@ -38,17 +40,21 @@ func (s *Server) handlerMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload model.Message
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
-		logger.Error(fmt.Sprintf("Failed to decode request body\r\n"+"\tBody: %s", r.Body))
+	requestBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Unable to read request body", http.StatusInternalServerError)
 		return
 	}
 
-	if err := payload.Validate(); err != nil {
-		http.Error(w, "Failed to validate request body", http.StatusBadRequest)
-		logger.Error("Failed to validate request body")
-		return
+	logger.Debug(fmt.Sprintf("Request body:\r\n%s", requestBody))
+
+	body := bytes.NewReader(requestBody)
+
+	var payload model.Message
+	if err := json.NewDecoder(body).Decode(&payload); err != nil {
+		logger.Error(fmt.Sprintf("Failed to decode request body\r\n"+"\tBody: %s", r.Body))
+		http.Error(w, "Failed to decode request body", http.StatusOK)
+		return 
 	}
 
 	s.messages <- payload

@@ -14,8 +14,13 @@ type SMTPConfig struct {
 	Subject         string   `envconfig:"SMTP_SUBJECT" default:"AIRBYTE NOTIFICATION"`
 }
 
-type Config struct {
+type App struct {
+	Host string `envconfig:"HOST" default:"localhost"`
 	Port string `envconfig:"PORT" default:"8080"`
+}
+
+type Config struct {
+	App  App
 	SMTP SMTPConfig
 }
 

@@ -25,8 +25,8 @@ func main() {
 	}
 
 	// инициализация server
-	port := fmt.Sprintf(":%s", config.Port)
-	server := internal.NewHTTPServer(port)
+	addr := fmt.Sprintf("%s:%s", config.App.Host, config.App.Port)
+	server := internal.NewHTTPServer(addr)
 	defer server.Close()
 
 	// инициализация smtp
@@ -52,6 +52,15 @@ func main() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, syscall.SIGTERM, syscall.SIGTERM)
 
+	// запуск HTTP сервера
+	go func() {
+		logger.Info(fmt.Sprintf("Starting server on %s", server.HttpServer.Addr))
+
+		if err := server.HttpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Fatal(fmt.Sprintf("Error starting http server: %s", err.Error()))
+		}
+	}()
+
 	// отправка сообщений по SMTP
 	go func() {
 		for message := range server.Messages() {
@@ -73,15 +82,6 @@ func main() {
 				message.RecordsProcessed,
 				message.ErrorMessage),
 			)
-		}
-	}()
-
-	// запуск HTTP сервера
-	go func() {
-		logger.Info(fmt.Sprintf("Starting server on %s", server.HttpServer.Addr))
-
-		if err := server.HttpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Fatal(fmt.Sprintf("Error starting http server: %s", err.Error()))
 		}
 	}()
 
