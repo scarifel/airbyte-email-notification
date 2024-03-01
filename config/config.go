@@ -15,7 +15,7 @@ type SMTP struct {
 }
 
 type App struct {
-	Host string `envconfig:"HOST" default:"localhost"`
+	Host string `envconfig:"HOST" default:"0.0.0.0"`
 	Port string `envconfig:"PORT" default:"8080"`
 }
 

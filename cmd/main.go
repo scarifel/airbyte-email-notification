@@ -71,20 +71,7 @@ func main() {
 				logger.Fatal(fmt.Sprintf("Email sent failed: %s", err.Error()))
 			}
 
-			logger.Info(fmt.Sprintf("Email sent success:\n"+
-				"Event: %s\n"+
-				"Stream: %s\n"+
-				"Sync start time: %s\n"+
-				"Sync end time: %s\n"+
-				"Record processed: %d\n"+
-				"Error message: %s",
-				message.Event,
-				message.Stream,
-				message.SyncStartTime.Format("2006-01-02 15:04:05"),
-				message.SyncEndTime.Format("2006-01-02 15:04:05"),
-				message.RecordsProcessed,
-				message.ErrorMessage),
-			)
+			logger.Info("Email sent success")
 		}
 	}()
 
