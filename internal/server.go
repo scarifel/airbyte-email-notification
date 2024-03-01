@@ -52,7 +52,7 @@ func (s *Server) handlerMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Debug(fmt.Sprintf("Request body: %s", requestBody))
+	logger.Debug(fmt.Sprintf("Request body:\n%s", requestBody))
 
 	body := bytes.NewReader(requestBody)
 	decoder := json.NewDecoder(body)

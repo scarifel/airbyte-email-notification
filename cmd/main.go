@@ -72,12 +72,12 @@ func main() {
 			}
 
 			logger.Info(fmt.Sprintf("Email sent success:\n"+
-				"\tEvent: %s\n"+
-				"\tStream: %s\n"+
-				"\tSync start time: %s\n"+
-				"\tSync end time: %s\n"+
-				"\tRecord processed: %d\n"+
-				"\tError message: %s",
+				"Event: %s\n"+
+				"Stream: %s\n"+
+				"Sync start time: %s\n"+
+				"Sync end time: %s\n"+
+				"Record processed: %d\n"+
+				"Error message: %s",
 				message.Event,
 				message.Stream,
 				message.SyncStartTime.Format("2006-01-02 15:04:05"),
