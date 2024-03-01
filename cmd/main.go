@@ -18,18 +18,25 @@ func main() {
 	logger.Info("Initalization server...")
 	logger.Info(fmt.Sprintf("Server mode: %s", logger.LogLevelString()))
 
-	// загрузка конфигурации
+	// load configuration
 	config, err := config.LoadConfig()
 	if err != nil {
 		logger.Fatal(fmt.Sprintf("Error loading configuration: %s", err.Error()))
 	}
 
-	// инициализация server
+	// server initialization
 	addr := fmt.Sprintf("%s:%s", config.App.Host, config.App.Port)
 	server := internal.NewHTTPServer(addr)
 	defer server.Close()
 
-	// инициализация smtp
+	
+	mailConfig := internal.MailConfig{
+		From:    config.SMTP.From,
+		To:      config.SMTP.To,
+		Subject: config.SMTP.Subject,
+	}
+	
+	// smtp initialization
 	smtp := internal.NewSMTP(internal.SMTPConfig{
 		Host:            config.SMTP.Host,
 		Port:            config.SMTP.Port,
@@ -37,11 +44,7 @@ func main() {
 		TLS:             config.SMTP.TLS,
 		Username:        config.SMTP.Username,
 		Password:        config.SMTP.Password,
-		MailConfig: internal.MailConfig{
-			From:    config.SMTP.From,
-			To:      config.SMTP.To,
-			Subject: config.SMTP.Subject,
-		},
+		MailConfig:      mailConfig,
 	})
 
 	if err := smtp.Connection(); err != nil {
@@ -52,7 +55,7 @@ func main() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, syscall.SIGTERM, syscall.SIGTERM)
 
-	// запуск HTTP сервера
+	// starting http server
 	go func() {
 		logger.Info(fmt.Sprintf("Starting server on %s", server.HttpServer.Addr))
 
@@ -61,7 +64,7 @@ func main() {
 		}
 	}()
 
-	// отправка сообщений по SMTP
+	// sending messages
 	go func() {
 		for message := range server.Messages() {
 			if err := smtp.SendMessage(message); err != nil {

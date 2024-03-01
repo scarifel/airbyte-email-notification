@@ -2,7 +2,7 @@ package config
 
 import "github.com/kelseyhightower/envconfig"
 
-type SMTPConfig struct {
+type SMTP struct {
 	Host            string   `envconfig:"SMTP_HOST" required:"true"`
 	Port            int      `envconfig:"SMTP_PORT" required:"true"`
 	AnonymousAccess bool     `envconfig:"SMTP_ANONYMOUS_ACCESS" required:"true"`
@@ -21,7 +21,7 @@ type App struct {
 
 type Config struct {
 	App  App
-	SMTP SMTPConfig
+	SMTP SMTP
 }
 
 func LoadConfig() (*Config, error) {

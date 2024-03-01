@@ -62,7 +62,7 @@ func (s *SMTP) connectionWithAuth() error {
 	return nil
 }
 
-// connect выполняет подключение к SMTP-серверу
+// connect makes a connection to the SMTP server
 func (s *SMTP) connect() error {
 	if err := s.checkEmailAddresses(); err != nil {
 		return err
@@ -87,7 +87,7 @@ func (s *SMTP) connect() error {
 	return nil
 }
 
-// checkEmailAddresses выполняет проверку контактных данных отправителя и получателя(ей) сообщения
+// checkEmailAddresses checks the contact details of the sender and the recipient(s) of the message
 func (s *SMTP) checkEmailAddresses() error {
 	if s.config.MailConfig.From == "" {
 		return errors.New("sender email cannot be empty")
@@ -100,19 +100,19 @@ func (s *SMTP) checkEmailAddresses() error {
 	return nil
 }
 
-// Close выполняет закрытие текущего подключения
+// Close closes the current connection
 func (s *SMTP) Close() error {
 	return s.conn.Close()
 }
 
-// SendMessage выполняет отправку сообщения
+// SendMessage performs the sending of a message
 func (s *SMTP) SendMessage(message model.Message) error {
-	// отправитель
+	// sender
 	if err := s.conn.Mail(s.config.MailConfig.From); err != nil {
 		return fmt.Errorf("failed to set sender: %w", err)
 	}
 
-	// получатель
+	// receiver
 	if err := s.conn.Rcpt(strings.Join(s.config.MailConfig.To, ",")); err != nil {
 		return fmt.Errorf("failed to add recipients: %w", err)
 	}

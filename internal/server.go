@@ -49,7 +49,6 @@ func (s *Server) handlerMessages(w http.ResponseWriter, r *http.Request) {
 	logger.Debug(fmt.Sprintf("Request body:\r\n%s", requestBody))
 
 	body := bytes.NewReader(requestBody)
-
 	var payload model.Message
 	if err := json.NewDecoder(body).Decode(&payload); err != nil {
 		logger.Error(fmt.Sprintf("Failed to decode request body\r\n"+"\tBody: %s", r.Body))
@@ -57,16 +56,19 @@ func (s *Server) handlerMessages(w http.ResponseWriter, r *http.Request) {
 		return 
 	}
 
-	s.messages <- payload
+	if payload.Validate() == nil {
+		s.messages <- payload
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
 
-// Messages возвращает канал для чтения сообщений
+// Messages returns a channel for reading messages
 func (s *Server) Messages() <-chan model.Message {
 	return s.messages
 }
 
-// Close выполняет закрытие канала
+// Close performs closing of the channel
 func (s *Server) Close() {
 	close(s.messages)
 }
