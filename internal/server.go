@@ -46,14 +46,22 @@ func (s *Server) handlerMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Debug(fmt.Sprintf("Request body:\r\n%s", requestBody))
+	// checking body if exists
+	if requestBody == nil {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	logger.Debug(fmt.Sprintf("Request body: %s", requestBody))
 
 	body := bytes.NewReader(requestBody)
+	decoder := json.NewDecoder(body)
+
 	var payload model.Message
-	if err := json.NewDecoder(body).Decode(&payload); err != nil {
-		logger.Error(fmt.Sprintf("Failed to decode request body\r\n"+"\tBody: %s", r.Body))
-		http.Error(w, "Failed to decode request body", http.StatusOK)
-		return 
+	if err := decoder.Decode(&payload); err != nil {
+		logger.Error(fmt.Sprintf("Failed to decode request body: \n"+"\t%s", r.Body))
+		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
+		return
 	}
 
 	if payload.Validate() == nil {

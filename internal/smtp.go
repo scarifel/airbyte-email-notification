@@ -134,20 +134,20 @@ func (s *SMTP) buildMail(m model.Message) []byte {
 	caserTitle := cases.Title(language.English)
 	caserUpper := cases.Upper(language.English)
 
-	subject := fmt.Sprintf("Subject: [%s] %s %s syncronization\r\n",
+	subject := fmt.Sprintf("Subject: [%s] %s %s syncronization\n",
 		s.config.MailConfig.Subject, caserTitle.String(m.Stream), caserUpper.String(m.Event))
 
-	body := fmt.Sprintf("Event: %s\r\n"+
-		"Stream: %s\r\n"+
-		"Sync Start: %s\r\n"+
-		"Sync End: %s\r\n"+
-		"Records Processed: %d\r\n",
+	body := fmt.Sprintf("Event: %s\n"+
+		"Stream: %s\n"+
+		"Sync Start: %s\n"+
+		"Sync End: %s\n"+
+		"Records Processed: %d\n",
 		m.Event, m.Stream, m.SyncStartTime, m.SyncEndTime, m.RecordsProcessed,
 	)
 
 	if m.ErrorMessage != "" {
-		body += fmt.Sprintf("Error Message: %s\r\n", m.ErrorMessage)
+		body += fmt.Sprintf("Error Message: %s\n", m.ErrorMessage)
 	}
 
-	return []byte(subject + "\r\n" + body)
+	return []byte(subject + "\n" + body)
 }
